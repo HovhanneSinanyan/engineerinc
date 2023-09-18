@@ -1,0 +1,37 @@
+<?php
+
+use Kernel\DBConnect;
+
+require __DIR__.'/vendor/autoload.php';
+
+
+if(!array_key_exists(1, $argv)) {
+    echo "Please add command to run \r\n";
+    return 1;
+}
+
+$command = $argv[1];
+
+if(function_exists($command)) {
+    call_user_func($command);
+} else {
+    echo "available commands are:\r\nmigrate\r\n";
+}
+
+function migrate() {
+    
+    $pdo = new DBConnect();
+    $connection = $pdo->getConnection();
+
+    $queries = require_once(__DIR__.'/database/migrations.php');
+    foreach($queries as $query) {
+        try {
+            $connection->prepare($query)->execute();
+        } catch (PDOException $e) {
+            echo $e->getMessage();
+            echo "\r\n";
+        }
+        
+    }
+}
+
